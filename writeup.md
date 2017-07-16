@@ -1,6 +1,6 @@
 **Behavioral Cloning Project**
 ---
-The goals / steps of this project are the following:
+The goals of this project are the following:
 * Use the simulator to collect data of good driving behavior
 * Build, a convolution neural network in Keras that predicts steering angles from images
 * Train and validate the model with a training and validation set
@@ -36,7 +36,7 @@ The model.py file contains the code for training and saving the convolution neur
 
 **3.1 Model Architecture**
 
-The model is built using Keras Sequential model API with TensorFlow on the backend. The model consists of the following layers sa reported by the model.summary() method:
+The model is built using Keras Sequential model API with TensorFlow on the backend. The model consists of the following layers as reported by model.summary():
 
 | Layer (type)            | Output Shape        | Param # | Comments                                                                                                       |
 |-------------------------|---------------------|---------|----------------------------------------------------------------------------------------------------------------|
@@ -69,15 +69,18 @@ The model was trained and validated on different data sets to ensure that the mo
 
 **3.3 Parameter Tuning**
 
-The model used an adam optimizer to minimize the MSE loss, so the learning rate was not tuned manually (model.py line 265).
+The model used an adam optimizer to minimize the MSE loss, so the learning rate was not tuned manually (model.py line 265). However, additional hyper parameters were introduced into the model during the course of development which will be explained in later sections:
+
+* Batch_Size: size of batch to pass to generators
+* Keep_Prob: probability of keeping parameters in dropout layer
+* Scale_Factor: factor to scale the zero angle driving data to balance the training data set
+* Flip_Angle: steering angle threshold over which images are flipped for data augmentation 
 
 **3.4 Gathering Training Data**
 
-Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road ... 
+Training data was initally gathered on Track 1 using the Udacity provided recommendations. i.e. center lane driving in both directions of the track to generate a balanced data set with some "recovery" driving to help the model recover the vehicle from unexpected situations. However, the final training data set used to train the model consisted of 3 laps of driving data collected from only the challenge track (Track 2). The collected data also included instances of recovery driving as they naturally occured while manually driving the tracks. Details of the problem exploration and justification for the training data and design steps are discussed in the following section.
 
-For details about how I created the training data, see the next section. 
-
-## 4. Solution Design Approach
+## 4. Solution Design
 
 The overall strategy for deriving a model architecture was to ...
 
