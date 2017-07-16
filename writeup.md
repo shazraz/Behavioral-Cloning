@@ -1,20 +1,10 @@
-#**Behavioral Cloning** 
-
-##Writeup Template
-
-###You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
-
----
-
 **Behavioral Cloning Project**
-
+---
 The goals / steps of this project are the following:
 * Use the simulator to collect data of good driving behavior
 * Build, a convolution neural network in Keras that predicts steering angles from images
 * Train and validate the model with a training and validation set
-* Test that the model successfully drives around track one without leaving the road
-* Summarize the results with a written report
-
+* Test that the model successfully drives around tracks without leaving the road
 
 [//]: # (Image References)
 
@@ -26,57 +16,68 @@ The goals / steps of this project are the following:
 [image6]: ./examples/placeholder_small.png "Normal Image"
 [image7]: ./examples/placeholder_small.png "Flipped Image"
 
-## Rubric Points
-###Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
+## 1. Project Files
 
----
-###Files Submitted & Code Quality
+The following files are available in this repository:
+* [model.py](https://github.com/shazraz/Behavioral-Cloning/blob/master/model.py) containing the script to create and train the model
+* [drive.py](https://github.com/shazraz/Behavioral-Cloning/blob/master/drive.py) for driving the car in autonomous mode
+* [model.h5](https://github.com/shazraz/Behavioral-Cloning/blob/master/model.h5) containing the trained convolution neural network 
 
-####1. Submission includes all required files and can be used to run the simulator in autonomous mode
-
-My project includes the following files:
-* model.py containing the script to create and train the model
-* drive.py for driving the car in autonomous mode
-* model.h5 containing a trained convolution neural network 
-* writeup_report.md or writeup_report.pdf summarizing the results
-
-####2. Submission includes functional code
-Using the Udacity provided simulator and my drive.py file, the car can be driven autonomously around the track by executing 
+## 2. Executing the model
+The car can be driven autonomously around the track by executing 
 ```sh
 python drive.py model.h5
 ```
+in the Udacity provided [simulator](https://github.com/udacity/self-driving-car-sim). The model is capable of driving the vehicle around both Track 1 and Track 2 in autonomous mode with the simulator set to the "Fastest" graphics setting.
 
-####3. Submission code is usable and readable
+The model.py file contains the code for training and saving the convolution neural network. The file shows the pipeline used for training and validating the model, and contains comments to explain how the code works.
 
-The model.py file contains the code for training and saving the convolution neural network. The file shows the pipeline I used for training and validating the model, and it contains comments to explain how the code works.
+## 3. Model Architecture and Training Strategy
 
-###Model Architecture and Training Strategy
+**3.1 Model Architecture**
 
-####1. An appropriate model architecture has been employed
+The model is built using Keras Sequential model API with TensorFlow on the backend. The model consists of the following layers sa reported by the model.summary() method:
 
-My model consists of a convolution neural network with 3x3 filter sizes and depths between 32 and 128 (model.py lines 18-24) 
+| Layer (type)            | Output Shape        | Param # | Comments                                                                                                       |
+|-------------------------|---------------------|---------|----------------------------------------------------------------------------------------------------------------|
+| Cropping (Cropping2D)   | (None, 45, 100, 5)  | 0       | Input shape of 100x100 pixels cropped to 45x100 pixels by removing 40 rows from the top and 15 from the bottom |
+| Normalization (Lambda)  | (None, 45, 100, 5)  | 0       | Scales pixel values by 255 and subtracts 0.5 to normalize pixel values between -0.5 and 0.5                    |
+| Conv1 (Convolution2D)   | (None, 45, 100, 12) | 552     | 3x3 kernel size with a stride of 1 and SAME padding. Normal distribution initialization of parameters with an ELU activation function.                                                            |
+| MaxPool1 (MaxPooling2D) | (None, 22, 50, 12)  | 0       | 2x2 kernel size                                                                                                |
+| Conv2 (Convolution2D)   | (None, 22, 50, 36)  | 3924    | 3x3 kernel size with a stride of 1 and SAME padding. Normal distribution initialization of parameters with an ELU activation function.                                                            |
+| MaxPool2 (MaxPooling2D) | (None, 11, 25, 36)  | 0       | 2x2 kernel size                                                                                                |
+| Conv3 (Convolution2D)   | (None, 11, 25, 48)  | 15600   | 3x3 kernel size with a stride of 1 and SAME padding. Normal distribution initialization of parameters with an ELU activation function.                                                            |
+| MaxPool3 (MaxPooling2D) | (None, 5, 12, 48)   | 0       | 2x2 kernel size                                                                                                |
+| Conv4 (Convolution2D)   | (None, 5, 12, 96)   | 41568   | 3x3 kernel size with a stride of 1 and SAME padding. Normal distribution initialization of parameters with an ELU activation function.                                                            |
+| MaxPool4 (MaxPooling2D) | (None, 2, 6, 96)    | 0       | 2x2 kernel size                                                                                                |
+| Flatten (Flatten)       | (None, 1152)        | 0       | Flattening layer                                                                                               |
+| FC1 (Dense)             | (None, 1280)        | 1475840 | Fully connected layer with ELU activation function                                                                                         |
+| Dropout1 (Dropout)      | (None, 1280)        | 0       | Dropout to reduce overfitting                                                                                  |
+| FC2 (Dense)             | (None, 320)         | 409920  | Fully connected layer with ELU activation function                                                                                          |
+| Dropout2 (Dropout)      | (None, 320)         | 0       | Dropout to reduce overfitting                                                                                  |
+| FC3 (Dense)             | (None, 80)          | 25680   | Fully connected layer with ELU activation function                                                                                          |
+| Dropout3 (Dropout)      | (None, 80)          | 0       | Dropout to reduce overfitting                                                                                  |
+| Output (Dense)          | (None, 1)           | 81      | Output layer                                                                                                   |
 
-The model includes RELU layers to introduce nonlinearity (code line 20), and the data is normalized in the model using a Keras lambda layer (code line 18). 
+This results in a total trainable parameters of 1,973,165
 
-####2. Attempts to reduce overfitting in the model
+**3.2 Addressing Overfitting**
 
-The model contains dropout layers in order to reduce overfitting (model.py lines 21). 
+The model contains three dropout layers applied to the outputs Dense layers FC1, FC2 and FC3 to combat overfitting. L2 regularization was also experimented with but not found to be necessary and degraded the performance of the model with even very low beta values (<0.0001)
 
-The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 10-16). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
+The model was trained and validated on different data sets to ensure that the model was not overfitting (code lines 269-271). An early stopping callback was also applied to the model with a delta of 0.0075 on the validation loss and a patience of 1 epoch to stop further training of the model if the validation loss did not monotonously decrease. The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
 
-####3. Model parameter tuning
+**3.3 Parameter Tuning**
 
-The model used an adam optimizer, so the learning rate was not tuned manually (model.py line 25).
+The model used an adam optimizer to minimize the MSE loss, so the learning rate was not tuned manually (model.py line 265).
 
-####4. Appropriate training data
+**3.4 Gathering Training Data**
 
 Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road ... 
 
 For details about how I created the training data, see the next section. 
 
-###Model Architecture and Training Strategy
-
-####1. Solution Design Approach
+## 4. Solution Design Approach
 
 The overall strategy for deriving a model architecture was to ...
 
