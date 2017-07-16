@@ -8,13 +8,9 @@ The goals of this project are the following:
 
 [//]: # (Image References)
 
-[image1]: ./examples/placeholder.png "Model Visualization"
-[image2]: ./examples/placeholder.png "Grayscaling"
-[image3]: ./examples/placeholder_small.png "Recovery Image"
-[image4]: ./examples/placeholder_small.png "Recovery Image"
-[image5]: ./examples/placeholder_small.png "Recovery Image"
-[image6]: ./examples/placeholder_small.png "Normal Image"
-[image7]: ./examples/placeholder_small.png "Flipped Image"
+[image1]: ./References/SampleData.png "Sample Data Steering Angles"
+[image2]: ./References/ScaledSampleData.png "Sample Data Steering Angles scaled by a factor of 0.5"
+[image3]: ./References/AugSampleData.png "Augmented Data Steering Angles"
 
 ## 1. Project Files
 
@@ -81,6 +77,20 @@ The model used an adam optimizer to minimize the MSE loss, so the learning rate 
 Training data was initally gathered on Track 1 using the Udacity provided recommendations. i.e. center lane driving in both directions of the track to generate a balanced data set with some "recovery" driving to help the model recover the vehicle from unexpected situations. However, the final training data set used to train the model consisted of 3 laps of driving data collected from only the challenge track (Track 2). The collected data also included instances of recovery driving as they naturally occured while manually driving the tracks. Details of the problem exploration and justification for the training data and design steps are discussed in the following section.
 
 ## 4. Solution Design
+
+The sample data provided with the project was visualized to determine the distribution of the steering angles collected. This is visualized in the image below.
+
+![alt text][image1]
+
+The available data is highly biased towards driving straight with an excessive amount of data points between less than |0.05| (where the steering angle is scaled to between -1 and 1). This was addressed by scaling the data points within this angle range by a factor of Scale_Factor, a hyper-parameter available for tuning. The scaled steering angles are shown below: 
+
+![alt text][image2]
+
+The dataset can further be balanced by flipping the images and steering angles for images where the steering angle is greater than a threshold of Flip_angle, where this parameter can also be tuned to augment the data. The augmented dataset for the sample data is visualized below.
+
+![alt text][image3]
+
+The initial approach to this project consisted of a model using three convolutional layers and three fully connected layers with fewer parameters than the model referenced above. 
 
 The overall strategy for deriving a model architecture was to ...
 
