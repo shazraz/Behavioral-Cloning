@@ -8,9 +8,13 @@ The goals of this project are the following:
 
 [//]: # (Image References)
 
-[image1]: ./References/SampleData.png "Sample Data Steering Angles"
-[image2]: ./References/ScaledSampleData.png "Sample Data Steering Angles scaled by a factor of 0.5"
-[image3]: ./References/AugSampleData.png "Augmented Data Steering Angles"
+[image1]: ./Images/SampleData.png "Sample Data Steering Angles"
+[image2]: ./Images/ScaledSampleData.png "Sample Data Steering Angles scaled by a factor of 0.5"
+[image3]: ./Images/AugSampleData.png "Augmented Data Steering Angles"
+[image4]: ./Images/FlippedImage.png "Flipped Image and Steering Angle"
+[image5]: ./Images/Track2Data.png "Scaled & Augmented Track 2 Steering Angle Data"
+[image6]: ./Images/Track2Cropped.png "Original & Cropped Image from Track 2"
+[image7]: ./Images/Track2Resized.png "Resized image from Track 2"
 
 ## 1. Project Files
 
@@ -78,19 +82,50 @@ Training data was initally gathered on Track 1 using the Udacity provided recomm
 
 ## 4. Solution Design
 
+**4.1 Initial Model**
+
 The sample data provided with the project was visualized to determine the distribution of the steering angles collected. This is visualized in the image below.
 
 ![alt text][image1]
 
-The available data is highly biased towards driving straight with an excessive amount of data points between less than |0.05| (where the steering angle is scaled to between -1 and 1). This was addressed by scaling the data points within this angle range by a factor of Scale_Factor, a hyper-parameter available for tuning. The scaled steering angles are shown below: 
+The available data is highly biased towards driving straight with an excessive amount of data points between less than |0.05| (where the steering angle is scaled to between -1 and 1). This was addressed by scaling the data points within this angle range by a factor of Scale_Factor, a hyper-parameter available for tuning. The scaled steering angles are shown below scaled by a factor of 0.5: 
 
 ![alt text][image2]
 
-The dataset can further be balanced by flipping the images and steering angles for images where the steering angle is greater than a threshold of Flip_angle, where this parameter can also be tuned to augment the data. The augmented dataset for the sample data is visualized below.
+The dataset can further be balanced by flipping the images and steering angles for images where the steering angle is greater than a threshold of Flip_angle, where this parameter can also be tuned to augment the data. The augmented dataset for the sample data is visualized below. A threshold value of 0.05 was used.
 
 ![alt text][image3]
 
-The initial approach to this project consisted of a model using three convolutional layers and three fully connected layers with fewer parameters than the model referenced above. 
+The images below show an image collected from Track 1 and a flipped image with the steering angle multiplied by -1.
+
+![alt text][image4]
+
+This dataset was then used to train an initial model consisting of 3 convolutional layers and 3 fully connected layers. The input RGB image had 35 of the top pixel rows and 10 of the bottom pixel rows cropped and was resized to 80x80. The convolutional layers were identical to the layers defined in the final model above whereas the three fully connected layers after the Flatten layer had 640, 460 and 40 parameters respectively. The dataset was split into a training split (80%) and validation split (20%). A Keep_Prob of 0.5 was used on the training data and the model was trained for 5 epochs. 
+
+This model was able to navigate the vehicle the majority of the way around Track 1 but was unable to do the sharper right turn encountered after the bridge in the first track. Two laps of additional data were collected on Track 1 driving the oppsite way around the track to provide additional training data. The model trained on the sample data was loaded (using the -m argument in model.py) and trained on the additional data collected using a scale factor of 0.3 and Flip_angle of 0.05 for 3 epochs. 
+
+This amount of data augmentation and training was sufficient to navigate the vehicle indefinitely around Track 1. This can be seen in the video linked [here](https://youtu.be/3Y8kd1PHrOk). 
+
+However, this model generalized very poorly to the challenge track where the vehicle ran into the barrier almost immediately after starting. Therefore, a more generalized model was required that would be able to navigate both tracks. 
+
+**4.2 Gathering More Training Data**
+
+The visualizations above show that the steering angle distribution available for Track 1 has a relatively Gaussian distribution and can therefore only perform soft right and left turns. As a result, a model trained on this training data would be unable to perform the hard right or left turns that require higher steering angles to successfully navigate the challenge track. This lack of steering data for sharper right/left turns could be obtained by using the right and left camera images on Track 1 and adding an offset to their steering angles, however, it was decided to collect data on Track 2 instead and generalize the model enough so that it would successfully drive Track 1 as well.
+
+The visualization below shows the steering angle distribution for 3 laps of data collected from Track 2. While collecting the training data, the vehicle was driven over the lane striping between the two lanes. Any "recovery" driving that naturally occured during the course of driving the 3 laps was also collected. The visualization below shows the data distribution scaled by a factor of 0.5 and augmented by flipping images and angles over the 0.05 angle threshold.
+
+![alt text][image5]
+
+The image above shows a much more balanced dataset and a model trained on this data would be capable of navigating much sharper turns. However, Track 2 contains a large number of uphill and downhill segments compared to Track 1 so the cropping of the images was adjusted to account for this. The top of the image was cropped by 40 pixel rows compared to 35 and the bottom of the image by 15 pixel rows compared to 10 to provide a narrower view of the scene to the model during training. The resulting image was resized to 100x100 as opposed to the 80x80 used for the initial model. The Track 2 images below show the original image, cropped image and resized images used to train the model.
+
+![alt text][image6]
+
+![alt text][image7]
+
+**4.3 Model Training & Generalization**
+
+The initial model described above was then trained on the Track 2 training data visualized in the previous section. 
+
 
 The overall strategy for deriving a model architecture was to ...
 
