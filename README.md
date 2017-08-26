@@ -125,7 +125,7 @@ The image above shows a much more balanced dataset and a model trained on this d
 
 The initial model described above was then trained on the Track 2 training data visualized in the previous section. The model and hyper-parameters were then tweaked step by step to look for an optimal solution. The training objective was, once again, to minimize the MSE loss and an early stopping callback with a patience of 1 and a validation loss delta of 0.0075 was used to terminate the training once the validation loss stopped reducing. 
 
-It was immediately seen that this model was able to perform much sharper turns as expected but the steering angle distribution and this was seen in the model performance in Track 1.
+It was immediately seen that this model was able to perform much sharper turns as expected due to the steering angle distribution and this was seen in the model performance in Track 1.
 
 One of the limitations noticed immediately was the tendency of the model to "search" for a stripe due to the nature of the training data where the vehicle is drived over the lane striping. This behaviour introduced a lot of weaving into the performance of the model when driving Track 1 autonomously but did not to affect Track 2. This effect was even more pronounced when trying to navigate Track 1 at higher speeds.
 
